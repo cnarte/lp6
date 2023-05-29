@@ -1,0 +1,127 @@
+#include<bits/stdc++.h>
+#include<omp.h>
+using namespace std;
+
+int serial_min(vector<int> arr)
+{
+	int n = arr.size();
+	int minm = INT_MAX;
+	for(int i=0; i<n; i++)
+		minm = min(minm, arr[i]);
+	return minm;
+}
+
+int parallel_min(vector<int> arr)
+{
+	int n = arr.size();
+	int minm = INT_MAX;
+	#pragma omp parallel for reduction(min:minm)
+	for(int i=0; i<n; i++)
+		minm = min(minm, arr[i]);
+	return minm;
+}
+
+int serial_max(vector<int> arr)
+{
+	int n = arr.size();
+	int maxm = INT_MIN;
+	for(int i=0; i<n; i++)
+		maxm = max(maxm, arr[i]);
+	return maxm;
+}
+
+int parallel_max(vector<int> arr)
+{
+	int n = arr.size();
+	int maxm = INT_MIN;
+	#pragma omp parallel for reduction(max:maxm)
+	for(int i=0; i<n; i++)
+		maxm = max(maxm, arr[i]);
+	return maxm;
+}
+
+int serial_sum(vector<int> arr)
+{
+	int n = arr.size();
+	int sum=0;
+	for(int i=0; i<n; i++)
+		sum += arr[i];
+	return sum;
+}
+
+int parallel_sum(vector<int> arr)
+{
+	int n = arr.size();
+	int sum=0;
+	#pragma omp parallel for reduction(+:sum)
+	for(int i=0; i<n; i++)
+		sum += arr[i];
+	return sum;
+}
+
+int main()
+{
+	vector<int> arr;
+	int n;
+
+	cout<<"\n Enter array size : ";
+	cin>>n;
+
+	for(int i=0; i<n; i++)
+		arr.push_back(rand()%500);
+		
+	double start, end;
+	float avg=0.0;
+	cout<<"\n_______________ Parllel Execution _______________\n";
+
+	start = omp_get_wtime();
+		int minm = parallel_min(arr);
+	end = omp_get_wtime();
+	cout<<"\n Min Element is : "<<minm<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	start = omp_get_wtime();
+		int maxm = parallel_max(arr);
+	end = omp_get_wtime();
+	cout<<"\n Max Element is : "<<maxm<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	start = omp_get_wtime();
+		int sum = parallel_sum(arr);
+	end = omp_get_wtime();
+	cout<<"\n Sum of Elements is : "<<sum<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+	
+	start = omp_get_wtime();
+		avg = (float)sum/n;
+	end = omp_get_wtime();
+	cout<<"\n Avg Element is : "<<avg<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	
+	
+	cout<<"\n_______________ Serial Execution _______________\n";
+
+	start = omp_get_wtime();
+		 minm = serial_min(arr);
+	end = omp_get_wtime();
+	cout<<"\n Min Element is : "<<minm<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	start = omp_get_wtime();
+		 maxm = serial_max(arr);
+	end = omp_get_wtime();
+	cout<<"\n Max Element is : "<<maxm<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	start = omp_get_wtime();
+		 sum = serial_sum(arr);
+	end = omp_get_wtime();
+	cout<<"\n Sum of Elements is : "<<sum<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+	
+	start = omp_get_wtime();
+		avg = (float)sum/n;
+	end = omp_get_wtime();
+	cout<<"\n Avg Element is : "<<avg<<" Time taken "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+
+
+
+
+	
+	return 0;
+}

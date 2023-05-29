@@ -1,0 +1,119 @@
+#include<bits/stdc++.h>
+#include<omp.h>
+
+using namespace std;
+
+double simple_linear_regression(const vector<double>& x, const vector<double>& y) {
+    double x_mean = 0, y_mean = 0;
+    int n = x.size();
+
+
+    for (int i = 0; i < n; i++) {
+        x_mean += x[i];
+        y_mean += y[i];
+    }
+
+    x_mean /= n;
+    y_mean /= n;
+
+    double numerator = 0, denominator = 0;
+
+
+    for (int i = 0; i < n; i++) {
+        numerator += (x[i] - x_mean) * (y[i] - y_mean);
+        denominator += (x[i] - x_mean) * (x[i] - x_mean);
+    }
+
+    return numerator / denominator;
+}
+
+double parllel_linear_regression(const vector<double>& x, const vector<double>& y) {
+    double x_mean = 0, y_mean = 0;
+    int n = x.size();
+
+    #pragma omp parallel for reduction(+: x_mean, y_mean)
+    for (int i = 0; i < n; i++) {
+        x_mean += x[i];
+        y_mean += y[i];
+    }
+
+    x_mean /= n;
+    y_mean /= n;
+
+    double numerator = 0, denominator = 0;
+
+    #pragma omp parallel for reduction(+: numerator, denominator)
+    for (int i = 0; i < n; i++) {
+        numerator += (x[i] - x_mean) * (y[i] - y_mean);
+        denominator += (x[i] - x_mean) * (x[i] - x_mean);
+    }
+
+    return numerator / denominator;
+}
+
+int main() 
+{
+	int number_of_pairs,c;
+	cout<<"Enter number of data point for the linear regression to figure out the seperation line\n";
+	cin>>number_of_pairs;
+	cout<<"Enter 1 for random values 0 for entering manually \n";
+
+	cin>>c;
+	
+	
+    vector<double> x;
+    vector<double> y ;
+	if(c==0)
+	{	
+		for(int i=0; i<number_of_pairs;++i)
+		{
+			
+			int temp_x;
+			cout<<"Enter x = ";
+			cin >>temp_x;
+			x.push_back(temp_x);
+		
+			int temp_y;
+			cout<<"Enter y = ";
+			cin >>temp_y;
+			y.push_back(temp_y);
+
+			
+		} 
+	}
+	else if (c==1)
+	{
+		for(int i=0; i<number_of_pairs;++i)
+		{
+			
+			
+			x.push_back(rand()%500);
+		
+			y.push_back(rand()%500);
+
+			
+		} 
+	}
+	
+	double start = omp_get_wtime();
+		double result = simple_linear_regression(x, y);
+	double end = omp_get_wtime();
+
+	cout<<"\n Time taken for simple LR "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	start = omp_get_wtime();
+		double result2 = parllel_linear_regression(x, y);
+	end = omp_get_wtime();
+
+	cout<<"\n Time taken for parllel LR "<<((end-start)*1000)<<" milli seconds \n"<<endl;
+
+	//cout<<"\nPairs\n";
+	//for (int i=0;i<number_of_pairs;i++)
+	//{
+	//	cout<<"Pair = "<<x[i]<<","<<y[i]<<endl;
+	//}
+
+    cout << "The slope of the linear regression line is " << result << endl;
+
+    return 0;
+}
